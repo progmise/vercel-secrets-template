@@ -1,0 +1,12 @@
+# IDE
+/.vscode
+/.idea
+/.env
+
+# OS / editors
+*.bak
+*.swp
+*.tmp
+*.temp
+*.log
+Thumbs.db
