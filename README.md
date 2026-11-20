@@ -1,7 +1,7 @@
 # vercel-secrets-template
 
-Template repo for **Secrets components** on the progmise platform — the
-Vercel equivalent of Gluon's `*-secrets` repos. Declares which secret env
+Template repo for **Secrets components** on the progmise platform — per-environment
+secret declaration repos. Declares which secret env
 vars exist per environment; deploying a version resolves each name from the
 platform credential store (Supabase Vault) and upserts it as a `sensitive`
 environment variable on the target Vercel project. No application code —
@@ -41,7 +41,7 @@ Environment access is role-gated: `developer` members can load `cert` and
 
 ## How it deploys
 
-`deploy.yml` (manual dispatch or via `deploy-manifest`'s orchestrator) takes
+`deploy.yml` (manual dispatch or via the app-model orchestrator) takes
 `version`, `environment`, `ci_id` and `project`. The orchestrator derives
 `project` from the manifest's `infrastructures[].properties.project` — the
 Vercel project this component feeds. `sec-deploy` then:
@@ -57,7 +57,7 @@ Vercel project this component feeds. `sec-deploy` then:
   `sec-config.py validate` rejects any `value:`/`key:` entries.
 - Keep the name set identical across all env files (CI enforces parity).
 - On any change, cut a release (`release.yml`) and bump the component's
-  `tag` in `deploy-manifest` — the manifest PR validates the tag exists.
+  `version` in the app-model OAM — its PR validates the tag exists.
 
 ## Flow
 
@@ -66,15 +66,14 @@ Seguridad view → values into the credential store. Separately: PR → `ci.yml`
 version lives in `version.txt`) → `deploy.yml` / orchestrator dispatches per
 `ci_id` → secrets upserted into the target Vercel project.
 
-Registering a secrets component in `deploy-manifest` looks like:
+Registering a secrets component in the app-model OAM looks like:
 
 ```yaml
   - name: loans-api-secrets
     repo: progmise/loans-api-secrets
-    tag: "0.1.0"
+    version: "0.1.0"
     type: secrets               # no docker image — the deployable unit is secrets/
-    needs: []
-    infra: [loans-api-pre, loans-api-pro]   # the app's infra ids
+    needs: []                 # env bindings live in this repo's .deploy/cd/{env}/cd.yml
   - name: loans-api
     ...
     needs: [loans-api-secrets]  # secrets land before the app deploys

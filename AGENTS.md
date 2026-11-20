@@ -11,9 +11,9 @@ runtime configuration: `secrets/<env>/secrets-<env>.yaml` declares the env
 -var names only; `sec-deploy` resolves each name against the platform
 credential store (Supabase Vault key `<NAME>__<ENV>`) and upserts it into
 the target Vercel project as `sensitive`. The binding to the app is declared
-in `deploy-manifest`: the secrets component lists the app's infra ids in
-its `infra:` and the app lists it in `needs:` (secrets land before the app
-deploys).
+in the app-model OAM (`needs:` on the app, so secrets land before it
+deploys) plus this repo's `.deploy/cd/{env}/cd.yml` — the ci_ids matching
+the app it configures.
 
 ## Structure
 
@@ -36,7 +36,7 @@ deploys).
 - Keep names in sync across every env file — `sec-config.py validate`
   enforces parity (missing/extra names fail the PR).
 - On any change to this repo, cut a release (`release.yml`) and bump the
-  component's `tag` in `deploy-manifest` — the manifest PR validates the
+  component's `version` in the app-model OAM — its PR validates the
   tag exists.
 - Deploy fails if a declared name has no stored value for that env — load
   missing secrets in Seguridad before deploying.
